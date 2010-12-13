@@ -81,12 +81,12 @@ def translate_state(state, resolution):
         u"closed": {
             u"fixed": u"accepted",
             u"worksforme": u"accepted",
-            u"invalid": u"rejected",
-            u"wontfix": u"rejected",
-            u"duplicate": u"rejected"
+            u"invalid": u"accepted",
+            u"wontfix": u"accepted",
+            u"duplicate": u"accepted"
         },
         u"reopened": {
-            "": u"started"
+            "": u"rejected"
         }
     }
     return states.get(state, {}).get(resolution, u"unscheduled")
