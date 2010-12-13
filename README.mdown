@@ -1,0 +1,49 @@
+Trac Ticket to Pivotal CSV Converter
+====================================
+
+A very simple script to convert [Trac][] tickets to a CSV-file importable by
+[Pivotal Tracker][].
+
+
+Warning: Don't blame me
+-----------------------
+
+This is intended as a starting point for a migration from a customized trac. You
+may use it as base for your own implementation, play with it, fork it and if you
+extend it I'll be very pleased to receive pull requests.
+
+But I'm not reponsible if you use it and anything happens that you don't like,
+expected or not.
+
+
+Installation
+------------
+
+Requirements: Python (tested with 2.7)
+
+As Trac allows modification of state, resolution etc. and most probably your users
+won't be named equal in Trac and Pivotal, you will probably want to modify at
+least these functions:
+
+* `translate_state()`: Translates Trac state and resolution to Pivotal Tracker
+  state
+* `translate_type()`: Translates Trac type to Pivotal story type
+* `translate_user()`: Translates Trac username to Pivotal Tracker user name
+
+
+Usage
+-----
+
+    ./trac2pivotal.py trac.db mytractickets.csv
+
+It probably is a good idea to manually inspect the resulting CSV file and perhaps
+test one or two of the lines that look like they most likely won't work (they
+usually do, spoiling your expectation).
+
+If you can't seem to find the tickets in Pivotal Tracker they might just be too
+old to be shown in the history. Try increasing the "Number of Done Iterations to
+Show" in the project settings to make them appear.
+
+
+[Trac]: http://trac.edgewall.org
+[Pivotal Tracker]: https://www.pivotaltracker.com
