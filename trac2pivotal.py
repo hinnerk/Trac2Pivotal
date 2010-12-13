@@ -130,6 +130,26 @@ def translate_user(user):
     return user
 
 
+def translate_tags(ticket):
+    """ converts tags and component to label
+
+    >>> translate_tags([0, 1, 2, 3, "A, B, C", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, "D"])
+    u'"D, A, B, C"'
+    >>> translate_tags([0, 1, 2, 3, "", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, "D"])
+    u'"D"'
+    >>> translate_tags([0, 1, 2, 3, "A, B, C", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, ""])
+    u'"A, B, C"'
+    >>> translate_tags([0, 1, 2, 3, "", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, ""])
+    ''
+    """
+    # add component to tags
+    label = ticket[16]
+    component = ticket[4]
+    if label and component:
+        return clean_text(label + ", " + component)
+    else:
+        return clean_text(label + component)
+
 
 def read_database(db):
     tickets = db.execute("select * from ticket", [])
@@ -167,17 +187,9 @@ def read_database(db):
         note_query = 'select newvalue from ticket_change where field=="comment" and ticket==? and newvalue != ""'
         notes = [clean_text(note[0]) for note in db.execute(note_query, [ticket[0]]).fetchall()]
 
-        # add component to tags
-        label = ticket[16]
-        component = ticket[4]
-        if label and component:
-            labels = clean_text(label + ", " + component)
-        else:
-            labels = clean_text(label + component)
-
         yield {"Id": ticket[0],
                "Story": clean_text(ticket[14] + " (Trac Ticket #%s)" % ticket[0]),
-               "Labels": labels,
+               "Labels": translate_tags(ticket),
                "Story Type": translate_type(ticket[1]),
                "Estimate": u"2",
                "Current State": translate_state(ticket[12], ticket[13]),
