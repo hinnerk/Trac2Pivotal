@@ -25,10 +25,10 @@ As Trac allows modification of state, resolution etc. and most probably your use
 won't be named equal in Trac and Pivotal, you will probably want to modify at
 least these functions:
 
-* `translate_state()`: Translates Trac state and resolution to Pivotal Tracker
-  state
-* `translate_type()`: Translates Trac type to Pivotal story type
-* `translate_user()`: Translates Trac username to Pivotal Tracker user name
+* `translate_state()`: Converts state and resolution to state
+* `translate_type()`: Converts type to story type
+* `translate_user()`: Converts user names
+* `translate_tags()`: Makes tags and components into labels
 
 
 Usage
