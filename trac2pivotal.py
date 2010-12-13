@@ -120,7 +120,7 @@ def translate_type(typ):
         u"defect": u"bug",
         u"discussion": u"feature",
         u"enhancement": u"feature",
-        u"task": u"chore"
+        u"task": u"feature"
     }.get(typ, u"feature")
 
 
