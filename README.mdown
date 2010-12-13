@@ -45,5 +45,16 @@ old to be shown in the history. Try increasing the "Number of Done Iterations to
 Show" in the project settings to make them appear.
 
 
+What's missing
+--------------
+
+* Ticket references ("#23") are not updated since the ID of the new Ticket is not
+  known in advance. This could be solved by using the HTTP API instead of CSV file 
+  import.
+* Mapping between states is generally difficult since both systems follw
+  very different routes. For example "wontfix" or "invalid" in Trac don't have a
+  correspondant state in Pivotal Tracker.
+
+
 [Trac]: http://trac.edgewall.org
 [Pivotal Tracker]: https://www.pivotaltracker.com
