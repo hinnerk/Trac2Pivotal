@@ -168,7 +168,7 @@ def read_database(db):
         notes = [clean_text(note[0]) for note in db.execute(note_query, [ticket[0]]).fetchall()]
 
         yield {"Id": ticket[0],
-               "Story": clean_text(ticket[14]),
+               "Story": clean_text(ticket[14] + " (Trac Ticket #%s)" % ticket[0]),
                "Labels": clean_text(ticket[16]),
                "Story Type": translate_type(ticket[1]),
                "Estimate": u"2",
