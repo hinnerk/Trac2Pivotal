@@ -57,23 +57,23 @@ def translate_state(state, resolution):
     >>> translate_state("assigned", "")
     u'started'
     >>> translate_state("new", "")
-    u'unstarted'
+    u'unscheduled'
     >>> translate_state("reopened", "")
-    u'started'
-    >>> translate_state("closed", "duplicate")
     u'rejected'
+    >>> translate_state("closed", "duplicate")
+    u'accepted'
     >>> translate_state("closed", "fixed")
     u'accepted'
     >>> translate_state("closed", "invalid")
-    u'rejected'
+    u'accepted'
     >>> translate_state("closed", "wontfix")
-    u'rejected'
+    u'accepted'
     >>> translate_state("closed", "worksforme")
     u'accepted'
     """
     states = {
         u"new": {
-            "": u"unstarted" # or maybe "unscheduled"?
+            "": u"unscheduled" # or maybe "unstarted"?
         },
         u"assigned": {
             "": u"started"
@@ -187,20 +187,22 @@ def read_database(db):
         note_query = 'select newvalue from ticket_change where field=="comment" and ticket==? and newvalue != ""'
         notes = [clean_text(note[0]) for note in db.execute(note_query, [ticket[0]]).fetchall()]
 
-        yield {"Id": ticket[0],
-               "Story": clean_text(ticket[14] + " (Trac Ticket #%s)" % ticket[0]),
-               "Labels": translate_tags(ticket),
-               "Story Type": translate_type(ticket[1]),
-               "Estimate": u"2",
-               "Current State": translate_state(ticket[12], ticket[13]),
-               "Created at": translate_time(ticket[2]),
-               "Accepted at": translate_time(ticket[3]),
-               "Deadline": u"",
-               "Requested By": translate_user(ticket[8]),
-               "Owned By": translate_user(ticket[7]),
-               "Description": clean_text(ticket[15]),
-               "Notes": ",".join(notes)    # Note1, Note2, ...
-        }
+        result = {}
+        result["Id"] = ticket[0]
+        result["Story"] = clean_text(ticket[14] + " (Trac Ticket #%s)" % ticket[0])
+        result["Labels"] = translate_tags(ticket)
+        result["Story Type"] = translate_type(ticket[1])
+        result["Current State"] = translate_state(ticket[12], ticket[13])
+        result["Created at"] = translate_time(ticket[2])
+        result["Accepted at"] = translate_time(ticket[3])
+        result["Deadline"] = u""
+        result["Requested By"] = translate_user(ticket[8])
+        result["Owned By"] = translate_user(ticket[7])
+        result["Description"] = clean_text(ticket[15])
+        result["Notes"] = ",".join(notes)    # Note1, Note2, ...
+        result["Estimate"] = "" if result["Current State"] in ("unscheduled", "unstarted") else "2"
+
+        yield result
 
 
 def write_csv(source, target):
