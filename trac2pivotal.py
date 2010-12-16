@@ -49,8 +49,15 @@ def format_story(ticket):
     """
     return ticket[14] + u" (Trac Ticket #%s)" % ticket[0]
 
+
+def translate_user(user):
+    """ translates trac user to pivotal user
+    """
+    return user
+
+
 #
-#   There's no configuration but only bugs below.
+#   There's no more configuration below.
 #
 
 def getargs():
@@ -140,12 +147,6 @@ def translate_type(typ):
     u'feature'
     """
     return TYPES.get(typ, u"feature")
-
-
-def translate_user(user):
-    """ translates trac user to pivotal user
-    """
-    return user
 
 
 def translate_tags(ticket):
