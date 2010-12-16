@@ -6,6 +6,9 @@ from datetime import datetime
 
 # translation from ticket state and resolution to story state
 # add your customized trac states/resolutions here
+# Tip: This shell command collects existing combinations from multiple tracs:
+# for x in */db/trac.db; do sqlite3 $x 'select status, resolution from ticket;'; done | sort | uniq
+
 STATES = {
     u"new": {
         "": (u"unscheduled", u"")    # new tickets are unscheduled and unestimated stories
@@ -27,12 +30,28 @@ STATES = {
 
 # translation from ticket type to story type
 # add your customized trac ticket types here
+# get your own tracs types from multiple tracs with this shell command:
+# for x in */db/trac.db; do sqlite3 $x 'select type from ticket;'; done | sort | uniq
+
 TYPES = {
     u"defect": u"bug",
     u"discussion": u"feature",
     u"enhancement": u"feature",
     u"task": u"feature"
 }
+
+
+def format_story(ticket):
+    """ adds some information to the story.
+
+    >>> format_story([23,'','','','','','','','','','','','','',u'My very own story'])
+    u'My very own story (Trac Ticket #23)'
+    """
+    return ticket[14] + u" (Trac Ticket #%s)" % ticket[0]
+
+#
+#   There's no configuration but only bugs below.
+#
 
 def getargs():
     """ get database file to read and csv file to write from
@@ -75,8 +94,6 @@ def clean_text(text):
 
 def translate_state(state, resolution):
     """ translates trac state/resolution pair to pivotal state
-    found the trac combinations with this shell command:
-    for x in */db/trac.db; do sqlite3 $x 'select status, resolution from ticket;'; done | sort | uniq
 
     >>> translate_state("", "")
     (u'unscheduled', '')
@@ -112,8 +129,6 @@ def translate_time(time):
 
 def translate_type(typ):
     """ translates trac type to pivotal story type
-    get your own tracs types:
-    for x in */db/trac.db; do sqlite3 $x 'select type from ticket;'; done | sort | uniq
 
     >>> translate_type("defect")
     u'bug'
@@ -192,7 +207,7 @@ def read_database(db):
 
         result = {}
         result["Id"] = ticket[0]
-        result["Story"] = clean_text(ticket[14] + " (Trac Ticket #%s)" % ticket[0])
+        result["Story"] = clean_text(format_story(ticket))
         result["Labels"] = translate_tags(ticket)
         result["Story Type"] = translate_type(ticket[1])
         result["Current State"], result["Estimate"] = translate_state(ticket[12], ticket[13])
