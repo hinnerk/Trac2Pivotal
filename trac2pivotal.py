@@ -7,24 +7,32 @@ from datetime import datetime
 # translation from ticket state and resolution to story state
 # add your customized trac states/resolutions here
 STATES = {
-        u"new": {
-            "": (u"unscheduled", u"")    # new tickets are unscheduled and unestimated stories
-        },
-        u"assigned": {
-            "": (u"started", u"2")       # assigned tickets are started stories with default estimate of 2 points
-        },
-        u"closed": {                            # closed as ....
-            u"fixed": (u"accepted", u"2"),       # fixed => accepted, 2 points (guessed average for history)
-            u"worksforme": (u"accepted", u"1"),  # worksforme => accepted, 1 point (----"----)
-            u"invalid": (u"accepted", u"0"),     # invalid => accepted, 0 points
-            u"wontfix": (u"accepted", u"0"),     # wontfix => accepted, 0 points
-            u"duplicate": (u"accepted", u"0")    # duplicate => accepted, 0 points
-        },
-        u"reopened": {
-            "": (u"rejected", u"2")              # reopened => rejected, guessed average 2 points
-        }
+    u"new": {
+        "": (u"unscheduled", u"")    # new tickets are unscheduled and unestimated stories
+    },
+    u"assigned": {
+        "": (u"started", u"2")       # assigned tickets are started stories with default estimate of 2 points
+    },
+    u"closed": {# closed as ....
+                u"fixed": (u"accepted", u"2"), # fixed => accepted, 2 points (guessed average for history)
+                u"worksforme": (u"accepted", u"1"), # worksforme => accepted, 1 point (----"----)
+                u"invalid": (u"accepted", u"0"), # invalid => accepted, 0 points
+                u"wontfix": (u"accepted", u"0"), # wontfix => accepted, 0 points
+                u"duplicate": (u"accepted", u"0")    # duplicate => accepted, 0 points
+    },
+    u"reopened": {
+        "": (u"rejected", u"2")              # reopened => rejected, guessed average 2 points
     }
+}
 
+# translation from ticket type to story type
+# add your customized trac ticket types here
+TYPES = {
+    u"defect": u"bug",
+    u"discussion": u"feature",
+    u"enhancement": u"feature",
+    u"task": u"feature"
+}
 
 def getargs():
     """ get database file to read and csv file to write from
@@ -116,12 +124,7 @@ def translate_type(typ):
     >>> translate_type("task")
     u'feature'
     """
-    return {
-        u"defect": u"bug",
-        u"discussion": u"feature",
-        u"enhancement": u"feature",
-        u"task": u"feature"
-    }.get(typ, u"feature")
+    return TYPES.get(typ, u"feature")
 
 
 def translate_user(user):
