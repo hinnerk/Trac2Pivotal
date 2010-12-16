@@ -4,8 +4,26 @@ import os
 import sqlite3
 from datetime import datetime
 
-
-__author__ = u'Hinnerk Haardt'
+# translation from ticket state and resolution to story state
+# add your customized trac states/resolutions here
+STATES = {
+        u"new": {
+            "": (u"unscheduled", u"")    # new tickets are unscheduled and unestimated stories
+        },
+        u"assigned": {
+            "": (u"started", u"2")       # assigned tickets are started stories with default estimate of 2 points
+        },
+        u"closed": {                            # closed as ....
+            u"fixed": (u"accepted", u"2"),       # fixed => accepted, 2 points (guessed average for history)
+            u"worksforme": (u"accepted", u"1"),  # worksforme => accepted, 1 point (----"----)
+            u"invalid": (u"accepted", u"0"),     # invalid => accepted, 0 points
+            u"wontfix": (u"accepted", u"0"),     # wontfix => accepted, 0 points
+            u"duplicate": (u"accepted", u"0")    # duplicate => accepted, 0 points
+        },
+        u"reopened": {
+            "": (u"rejected", u"2")              # reopened => rejected, guessed average 2 points
+        }
+    }
 
 
 def getargs():
@@ -53,43 +71,25 @@ def translate_state(state, resolution):
     for x in */db/trac.db; do sqlite3 $x 'select status, resolution from ticket;'; done | sort | uniq
 
     >>> translate_state("", "")
-    u'unscheduled'
+    (u'unscheduled', '')
     >>> translate_state("assigned", "")
-    u'started'
+    (u'started', u'2')
     >>> translate_state("new", "")
-    u'unscheduled'
+    (u'unscheduled', u'')
     >>> translate_state("reopened", "")
-    u'rejected'
+    (u'rejected', u'2')
     >>> translate_state("closed", "duplicate")
-    u'accepted'
+    (u'accepted', u'0')
     >>> translate_state("closed", "fixed")
-    u'accepted'
+    (u'accepted', u'2')
     >>> translate_state("closed", "invalid")
-    u'accepted'
+    (u'accepted', u'0')
     >>> translate_state("closed", "wontfix")
-    u'accepted'
+    (u'accepted', u'0')
     >>> translate_state("closed", "worksforme")
-    u'accepted'
+    (u'accepted', u'1')
     """
-    states = {
-        u"new": {
-            "": u"unscheduled" # or maybe "unstarted"?
-        },
-        u"assigned": {
-            "": u"started"
-        },
-        u"closed": {
-            u"fixed": u"accepted",
-            u"worksforme": u"accepted",
-            u"invalid": u"accepted",
-            u"wontfix": u"accepted",
-            u"duplicate": u"accepted"
-        },
-        u"reopened": {
-            "": u"rejected"
-        }
-    }
-    return states.get(state, {}).get(resolution, u"unscheduled")
+    return STATES.get(state, {}).get(resolution, (u"unscheduled", ""))
 
 
 def translate_time(time):
@@ -114,7 +114,7 @@ def translate_type(typ):
     >>> translate_type("enhancement")
     u'feature'
     >>> translate_type("task")
-    u'chore'
+    u'feature'
     """
     return {
         u"defect": u"bug",
@@ -192,7 +192,7 @@ def read_database(db):
         result["Story"] = clean_text(ticket[14] + " (Trac Ticket #%s)" % ticket[0])
         result["Labels"] = translate_tags(ticket)
         result["Story Type"] = translate_type(ticket[1])
-        result["Current State"] = translate_state(ticket[12], ticket[13])
+        result["Current State"], result["Estimate"] = translate_state(ticket[12], ticket[13])
         result["Created at"] = translate_time(ticket[2])
         result["Accepted at"] = translate_time(ticket[3])
         result["Deadline"] = u""
@@ -200,7 +200,6 @@ def read_database(db):
         result["Owned By"] = translate_user(ticket[7])
         result["Description"] = clean_text(ticket[15])
         result["Notes"] = ",".join(notes)    # Note1, Note2, ...
-        result["Estimate"] = "" if result["Current State"] in ("unscheduled", "unstarted") else "2"
 
         yield result
 
