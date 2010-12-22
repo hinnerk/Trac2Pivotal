@@ -267,6 +267,10 @@ def write_csv(source, target):
         print "%(Id)s," % e,
         csv_line = line % e
         writer.write(csv_line.encode("utf-8"))
+        if len(e['Description']) > 5000:
+            print "\n\nWARNING: Description of #%s in %s has %s Bytes, max 5000 allowed." % (e["Id"], file_name, len(e['Description']))
+            print "Please edit %s to correct this.\n" % file_name
+
     writer.close()
 
 
