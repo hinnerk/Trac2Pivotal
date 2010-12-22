@@ -157,22 +157,22 @@ def translate_type(typ):
 def translate_tags(ticket):
     """ converts tags and component to label
 
-    >>> translate_tags([0, 1, 2, 3, "A, B, C", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, "D"])
-    u'"D, A, B, C"'
-    >>> translate_tags([0, 1, 2, 3, "", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, "D"])
-    u'"D"'
-    >>> translate_tags([0, 1, 2, 3, "A, B, C", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, ""])
-    u'"A, B, C"'
-    >>> translate_tags([0, 1, 2, 3, "", 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, ""])
-    ''
+    >>> translate_tags(["0", "1", "2", "3", "A, B, C", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "D"])
+    u'"D, A, B, C, 10, 11"'
+    >>> translate_tags(["0", "1", "2", "3", "", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "D"])
+    u'"D, 10, 11"'
+    >>> translate_tags(["0", "1", "2", "3", "A, B, C", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", ""])
+    u'"A, B, C, 10, 11"'
+    >>> translate_tags(["0", "1", "2", "3", "", "5", "6", "7", "8", "9", "", "", "12", "13", "14", "15", ""])
+    u''
     """
     # add component to tags
-    label = ticket[16]
-    component = ticket[4]
-    if label and component:
-        return clean_text(label + ", " + component)
-    else:
-        return clean_text(label + component)
+    keys = [16,     # keywords
+            4,      # component
+            10,     # version
+            11,     # milestone
+    ]
+    return clean_text(u", ".join([ticket[x] for x in keys if ticket[x]]))
 
 
 def read_database(db):
