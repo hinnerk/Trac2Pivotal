@@ -242,7 +242,7 @@ def write_csv(source, target):
     line_count = 0
     for entry in source:
         line_count += 1
-        if line_count % 400 == 0:
+        if line_count % 100 == 0:
             writer.close()
             file_count += 1
             file_name = "%s-%s.csv" % (target, file_count)
