@@ -8,6 +8,7 @@ from datetime import datetime
 # add your customized trac states/resolutions here
 # Tip: This shell command collects existing combinations from multiple tracs:
 # for x in */db/trac.db; do sqlite3 $x 'select status, resolution from ticket;'; done | sort | uniq
+import re
 
 STATES = {
     u"new": {
@@ -86,6 +87,9 @@ def getargs():
         sys.exit(1)
 
 
+re_bold = re.compile(r"'''(.+?)'''")
+re_italic = re.compile(r"''(.+?)''")
+
 def clean_text(text):
     """ cleans up text
     >>> x = u'F\xfcr ben\xf6tigt k\xf6nnte.\\r\\n\\r\\nTest'
@@ -93,6 +97,8 @@ def clean_text(text):
     u'"F\\xfcr ben\\xf6tigt k\\xf6nnte.\\r\\n\\r\\nTest"'
     """
     if text:
+        text = re_bold.sub(r"*\1*", text)
+        text = re_italic.sub(r"_\1_", text)
         text = text.replace(u'"', u"'")
         text = u'"' + text + u'"'
     return text
