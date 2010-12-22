@@ -67,18 +67,17 @@ def getargs():
     try:
         read = sys.argv[1]
         write = sys.argv[2]
-        print 'Reading "%s", writing "%s".' % (sys.argv[1], sys.argv[2])
-        if os.path.isfile(read) and not os.path.isfile(write):
+        write = "".join(write.split(".")[:-1]) if "." in write else write
+        print 'Reading "%s", writing "%s-*.csv".' % (read, write)
+        if os.path.isfile(read) and not os.path.isfile(write + "-1.csv"):
             r = sqlite3.connect(read)
             count = r.execute("select count() from ticket").fetchall()[0][0]
             if count == 0:
                 print "No tickets in data base..."
                 sys.exit(0)
-            elif count > 400:
-                print "Sorry, %s tickets and Pivotal won't import more than 400..." % count
-                sys.exit(42)
-            w = open(write, "wb")
-            return (r, w)
+            else:
+                print "Converting %s tickets..." % count
+            return (r, write)
         else:
             print 'ERROR: Either file "%s" does not exist or file "%s" does already exist.' % (read, write)
             sys.exit(1)
@@ -224,13 +223,26 @@ def read_database(db):
 
 
 def write_csv(source, target):
-    target.write((u"Id,Story,Labels,Story Type,Estimate,Current State,Created at,Accepted at,"
-                  u"Deadline,Requested By,Owned By,Description,Note,Note\n"))
+    intro = (u"Id,Story,Labels,Story Type,Estimate,Current State,Created at,Accepted at,"
+             u"Deadline,Requested By,Owned By,Description,Note,Note\n")
+    file_count = 1
+    file_name = "%s-%s.csv" % (target, file_count)
+    writer = open(file_name, "wb")
+    writer.write(intro)
     line = (u"%(Id)s,%(Story)s,%(Labels)s,%(Story Type)s,%(Estimate)s,%(Current State)s,"
             u"%(Created at)s,%(Accepted at)s,%(Deadline)s,%(Requested By)s,%(Owned By)s,"
             u"%(Description)s,%(Notes)s\n")
-    print "Writing..."
+    print "Writing tickets to %s ...\n" % file_name,
+    line_count = 0
     for entry in source:
+        line_count += 1
+        if line_count % 400 == 0:
+            writer.close()
+            file_count += 1
+            file_name = "%s-%s.csv" % (target, file_count)
+            writer = open(file_name, "wb")
+            print "\n\nWriting tickets to %s ...\n" % file_name,
+            writer.write(intro)
         e = {"Id": u"",
              "Story": u"",
              "Labels": u"",
@@ -246,9 +258,10 @@ def write_csv(source, target):
              "Notes": u""    # Note1, Note2, ...
         }
         e.update(entry)
-        print "\tTicket %(Id)s: %(Story)s" % e
+        print "%(Id)s," % e,
         csv_line = line % e
-        target.write(csv_line.encode("utf-8"))
+        writer.write(csv_line.encode("utf-8"))
+    writer.close()
 
 
 def main():
@@ -257,8 +270,7 @@ def main():
     db, target = getargs()
     source = read_database(db)
     write_csv(source, target)
-    target.close()
-    print "Done!"
+    print "\n\nDone!"
 
 
 if __name__ == "__main__":
