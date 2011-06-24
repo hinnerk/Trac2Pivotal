@@ -266,10 +266,18 @@ def write_csv(source, target):
         e.update(entry)
         print "%(Id)s," % e,
         csv_line = line % e
-        writer.write(csv_line.encode("utf-8"))
+
         if len(e['Description']) > 5000:
             print "\n\nWARNING: Description of #%s in %s has %s Bytes, max 5000 allowed." % (e["Id"], file_name, len(e['Description']))
-            print "Please edit %s to correct this.\n" % file_name
+            print "These lines have been saved to trac_too_long_to_import.csv.\n"
+
+            long_writer = open("trac_long.csv", "ab")
+            long_writer.write(csv_line.encode("utf-8"))
+            long_writer.close()
+        else:
+            writer.write(csv_line.encode("utf-8"))
+
+
 
     writer.close()
 
